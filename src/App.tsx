@@ -1,4 +1,5 @@
 import axios from 'axios';
+import _ from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { getPokemons, getPokemonTypes } from './api';
 import Filter from './components/Filter';
@@ -8,7 +9,7 @@ import PokemonList from './components/PokemonList';
 function App() {
 	const [filterIsLoading, setFilterIsLoading] = useState(true);
 	const [pokemonTypes, setPokemonTypes] = useState<PokemonTypeDetail[]>([]);
-	const [activeFilters, setActiveFilters] = useState<Object>({});
+	const [activeFilters, setActiveFilters] = useState<string[]>([]);
 	const availableFilters = pokemonTypes.map((type) => type.name);
 
 	const [pokemons, setPokemons] = useState<Pokemon[]>([]);
@@ -43,12 +44,15 @@ function App() {
 	}, []);
 
 	const handleAddFilter = (filter: string) => {
-		setActiveFilters({ ...activeFilters, [filter]: true });
+		setActiveFilters([...activeFilters, filter]);
 		setCurrentPage(0);
 	};
 
 	const handleRemoveFilter = (filter: string) => {
-		setActiveFilters({ ...activeFilters, [filter]: false });
+		const newActiveFilters = [...activeFilters];
+		const index = newActiveFilters.indexOf(filter);
+		newActiveFilters.splice(index, 1);
+		setActiveFilters(newActiveFilters);
 		setCurrentPage(0);
 	};
 
@@ -61,14 +65,30 @@ function App() {
 	};
 
 	const filteredData = useMemo(() => {
-		return pokemons;
+		if (activeFilters.length > 0) {
+			let unfiltered = [];
+			let filtered: any = [];
+			for (let i of activeFilters) {
+				const type = pokemonTypes.find((type) => type.name == i);
+				unfiltered.push(type!.pokemon!.map((pokemon) => pokemon.pokemon));
+			}
+
+			if (unfiltered.length >= 1) {
+				filtered = unfiltered.reduce((previous, current) =>
+					_.intersectionWith(previous, current, _.isEqual)
+				);
+			}
+			return filtered;
+		} else {
+			return pokemons;
+		}
 	}, [activeFilters, pokemons]);
 
 	const pagedData = useMemo(() => {
 		const startIndex = PAGE_SIZE * currentPage;
 		const endIndex = startIndex + PAGE_SIZE;
 		return filteredData.slice(startIndex, endIndex);
-	}, [currentPage, pokemons]);
+	}, [currentPage, pokemons, filteredData]);
 
 	return (
 		<div className="App">
