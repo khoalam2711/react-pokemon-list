@@ -12,10 +12,7 @@ interface PokemonTypeDetail {
 	id: number;
 	name: string;
 	pokemon: {
-		pokemon: {
-			name: string;
-			url: string;
-		};
+		pokemon: Pokemon
 	}[];
 }
 interface PokemonDetail {

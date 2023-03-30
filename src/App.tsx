@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getPokemons, getPokemonTypes } from './api';
 import Filter from './components/Filter';
+import Pagination from './components/Pagination';
 import PokemonList from './components/PokemonList';
 
 function App() {
@@ -10,9 +11,9 @@ function App() {
 	const [activeFilters, setActiveFilters] = useState<Object>({});
 	const availableFilters = pokemonTypes.map((type) => type.name);
 
-	const [currentPage, setCurrentPage] = useState(0);
 	const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-	const currentShowingPokemon = pokemons.slice(0, 48);
+	const [currentPage, setCurrentPage] = useState(0);
+	const PAGE_SIZE = 48;
 
 	useEffect(() => {
 		const getTypeData = async () => {
@@ -24,7 +25,7 @@ function App() {
 				axios.get(type.url)
 			);
 			const typeResponse = await Promise.all(pokemonTypeDetailsPromises);
-			
+
 			const pokemonTypeDetails = typeResponse.map((response) => response.data);
 			setPokemonTypes(pokemonTypeDetails);
 			setFilterIsLoading(false);
@@ -43,11 +44,32 @@ function App() {
 
 	const handleAddFilter = (filter: string) => {
 		setActiveFilters({ ...activeFilters, [filter]: true });
+		setCurrentPage(0);
 	};
 
 	const handleRemoveFilter = (filter: string) => {
 		setActiveFilters({ ...activeFilters, [filter]: false });
+		setCurrentPage(0);
 	};
+
+	const handleGoToNextPage = () => {
+		setCurrentPage((currentPage) => ++currentPage);
+	};
+
+	const handleGoToPrevPage = () => {
+		setCurrentPage((currentPage) => --currentPage);
+	};
+
+	const filteredData = useMemo(() => {
+		return pokemons;
+	}, [activeFilters, pokemons]);
+
+	const pagedData = useMemo(() => {
+		const startIndex = PAGE_SIZE * currentPage;
+		const endIndex = startIndex + PAGE_SIZE;
+		return filteredData.slice(startIndex, endIndex);
+	}, [currentPage, pokemons]);
+
 	return (
 		<div className="App">
 			<div className="mx-auto max-w-screen-xl">
@@ -59,12 +81,17 @@ function App() {
 							onAddFilter={handleAddFilter}
 							onRemoveFilter={handleRemoveFilter}
 						/>
-						<div className="my-12 mx-4 font-bold">1200 results found.</div>
+						<div className="my-12 mx-4 font-bold">{filteredData.length} results found.</div>
 					</>
 				)}
 			</div>
-
-			<PokemonList pokemons={currentShowingPokemon} />
+			<PokemonList pokemons={pagedData} />
+			<Pagination
+				currentPage={currentPage}
+				totalPage={filteredData.length / PAGE_SIZE}
+				onGoToNextPage={handleGoToNextPage}
+				onGoToPrevPage={handleGoToPrevPage}
+			/>
 		</div>
 	);
 }
