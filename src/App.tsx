@@ -68,16 +68,18 @@ function App() {
 		if (activeFilters.length > 0) {
 			let unfiltered = [];
 			let filtered: any = [];
-			for (let i of activeFilters) {
-				const type = pokemonTypes.find((type) => type.name == i);
-				unfiltered.push(type!.pokemon!.map((pokemon) => pokemon.pokemon));
+
+			for (let filter of activeFilters) {
+				const type = pokemonTypes.find((type) => type.name == filter);
+				unfiltered.push(type!.pokemon.map((pokemon) => pokemon.pokemon));
 			}
 
-			if (unfiltered.length >= 1) {
+			if (unfiltered.length > 0) {
 				filtered = unfiltered.reduce((previous, current) =>
 					_.intersectionWith(previous, current, _.isEqual)
 				);
 			}
+
 			return filtered;
 		} else {
 			return pokemons;
