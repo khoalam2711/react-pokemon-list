@@ -11,7 +11,6 @@ const PokemonImage = ({ url }: PokemonImageProps) => {
 	useEffect(() => {
 		const getPokemonData = async () => {
 			const { data } = await axios.get(url);
-			console.log(data);
 			setImageURL(data.sprites.other['official-artwork'].front_default);
 		};
 		getPokemonData();

@@ -6,6 +6,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Home from './pages/Home';
 import ErrorPage from './pages/Error';
+import PokemonListPage from './pages/PokemonList';
 
 const router = createBrowserRouter([
 	{
@@ -15,7 +16,7 @@ const router = createBrowserRouter([
 	},
 	{
 		path: 'pokemon-list',
-		element: <App />,
+		element: <PokemonListPage />,
 	},
 ]);
 

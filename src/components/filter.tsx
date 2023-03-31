@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface FilterProps {
 	filters: string[];
 	activeFilters: any;
