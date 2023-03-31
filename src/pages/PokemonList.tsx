@@ -70,7 +70,7 @@ function PokemonListPage() {
 			let filtered: any = [];
 
 			for (let filter of activeFilters) {
-				const type = pokemonTypes.find((type) => type.name == filter);
+				const type = pokemonTypes.find((type) => type.name === filter);
 				unfiltered.push(type!.pokemon.map((pokemon) => pokemon.pokemon));
 			}
 
